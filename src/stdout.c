@@ -11,12 +11,14 @@
 #include "mpsp.h"
 #include "opencl.h"
 #include "stdout.h"
+#include "policy_flag.h"
 
 static void out_flush (out_t *out)
 {
   if (out->len == 0) return;
 
   fwrite (out->buf, 1, out->len, out->fp);
+  printf("Policy Flag: %d, %d\n", check_length, check_number);
 
   out->len = 0;
 }
@@ -98,6 +100,7 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
 
   if (user_options->attack_mode == ATTACK_MODE_STRAIGHT)
   {
+    printf("ATTACK_MODE_STRAIGHT\n");
     pw_t pw;
 
     for (u32 gidvid = 0; gidvid < pws_cnt; gidvid++)

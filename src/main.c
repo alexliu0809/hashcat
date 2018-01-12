@@ -19,6 +19,7 @@
 #include "status.h"
 #include "interface.h"
 #include "event.h"
+#include "policy_flag.h"
 
 #if defined (__MINGW64__) || defined (__MINGW32__)
 int _dowildcard = -1;
@@ -961,9 +962,12 @@ static void event (const u32 id, hashcat_ctx_t *hashcat_ctx, const void *buf, co
     case EVENT_WORDLIST_CACHE_HIT:        main_wordlist_cache_hit        (hashcat_ctx, buf, len); break;
   }
 }
-
+int check_length;
+int check_number;
 int main (int argc, char **argv)
 {
+  check_length = 2;
+  check_number = 1;
   // this increases the size on windows dox boxes
 
   setup_console ();
