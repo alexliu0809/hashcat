@@ -13,12 +13,14 @@
 #include "stdout.h"
 #include "policy_flag.h"
 
+u32 plain_buf_save[16] = { 0 };
+u32 plain_len_save =  0;
 static void out_flush (out_t *out)
 {
   if (out->len == 0) return;
 
   fwrite (out->buf, 1, out->len, out->fp);
-  printf("Policy Flag: %d, %d\n", check_length, check_number);
+  //printf("Policy Flag: %d, %d\n", check_length, check_number);
 
   out->len = 0;
 }
@@ -43,6 +45,24 @@ static void out_push (out_t *out, const u8 *pw_buf, const int pw_len)
   out->len += pw_len + 1;
 
   #endif
+
+  if (out->len >= BUFSIZ - 100)
+  {
+    out_flush (out);
+  }
+}
+
+static void out_push_original (out_t *out, const u8 *pw_buf, const int pw_len)
+{
+  char *ptr = out->buf + out->len;
+
+  memcpy (ptr, pw_buf, pw_len);
+
+
+  ptr[pw_len] = '\t';
+
+  out->len += pw_len + 1;
+
 
   if (out->len >= BUFSIZ - 100)
   {
@@ -94,13 +114,15 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
 
   u8 *plain_ptr = (u8 *) plain_buf;
 
+  u8 *plain_ptr_save = (u8 *) plain_buf_save;
+
   u32 plain_len = 0;
 
   const u32 il_cnt = device_param->kernel_params_buf32[30]; // ugly, i know
 
   if (user_options->attack_mode == ATTACK_MODE_STRAIGHT)
   {
-    printf("ATTACK_MODE_STRAIGHT\n");
+    //printf("ATTACK_MODE_STRAIGHT\n");
     pw_t pw;
 
     for (u32 gidvid = 0; gidvid < pws_cnt; gidvid++)
@@ -123,13 +145,21 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
           plain_buf[i] = pw.i[i];
         }
 
+        for (int i = 0; i < 8; i++)
+        {
+          plain_buf_save[i] = pw.i[i];
+        }
+
         plain_len = pw.pw_len;
+        plain_len_save = pw.pw_len;
 
         plain_len = apply_rules (straight_ctx->kernel_rules_buf[pos + il_pos].cmds, &plain_buf[0], &plain_buf[4], plain_len);
 
         if (plain_len > hashconfig->pw_max) plain_len = hashconfig->pw_max;
 
+        out_push_original (&out, plain_ptr_save, plain_len_save);
         out_push (&out, plain_ptr, plain_len);
+        
       }
     }
   }
