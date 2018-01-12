@@ -964,8 +964,41 @@ static void event (const u32 id, hashcat_ctx_t *hashcat_ctx, const void *buf, co
 }
 int check_length;
 int check_number;
+bool prefix(const char *pre, const char *str)
+{
+    return strncmp(pre, str, strlen(pre)) == 0;
+}
+
 int main (int argc, char **argv)
 {
+  int new_argc = argc;
+  for (int i = 0; i < argc; i++)
+  {
+    printf("%s\n",argv[i]);
+    if (prefix("--length",argv[i]))
+    {
+      new_argc --;
+    }
+    else if (prefix("--digits",argv[i]))
+    {
+      new_argc --;
+    }
+    else if (prefix("--uppers",argv[i]))
+    {
+      new_argc --;
+    }
+    else if (prefix("--lowers",argv[i]))
+    {
+      new_argc --;
+    }
+    else if (prefix("--symbols",argv[i]))
+    {
+      new_argc --;
+    }
+
+  }
+  argc = new_argc;
+
   check_length = 2;
   check_number = 1;
   // this increases the size on windows dox boxes
