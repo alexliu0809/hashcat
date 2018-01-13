@@ -1095,7 +1095,7 @@ int choose_kernel (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, 
   hashes_t       *hashes       = hashcat_ctx->hashes;
   status_ctx_t   *status_ctx   = hashcat_ctx->status_ctx;
   user_options_t *user_options = hashcat_ctx->user_options;
-
+  printf("choose_kernel: %d %d \n", highest_pw_len, pws_cnt); //Result: 0, 8 -- for total 16 pwds. Not used: highest_pw_len
   if (hashconfig->hash_mode == 2000)
   {
     return process_stdout (hashcat_ctx, device_param, pws_cnt);
@@ -1875,6 +1875,27 @@ int run_cracker (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, co
     else if (user_options_extra->attack_kern == ATTACK_KERN_BF)        innerloop_cnt  = mask_ctx->bfs_cnt;
 
     // innerloops
+    printf("Innerloops: %d %d %d\n", innerloop_cnt, innerloop_step, hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
+    /*
+    device_param->kernel_loops_min = 1;
+    device_param->kernel_loops_max = 1024;
+
+    Warning: The Behaviour is Not Fixed
+    Innerloops: 4105 1024 1
+    choose_kernel: 0 8 
+    choose_kernel: 0 8 
+    choose_kernel: 0 8 
+    choose_kernel: 0 8 
+    choose_kernel: 0 8
+
+    Innerloops: 21 10 1
+    choose_kernel: 0 8 
+    choose_kernel: 0 8 
+    choose_kernel: 0 8 
+
+    Innerloops: 65117 1024 1
+    */
+
 
     for (u32 innerloop_pos = 0; innerloop_pos < innerloop_cnt; innerloop_pos += innerloop_step)
     {

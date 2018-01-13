@@ -218,9 +218,9 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
         increament_pw_cnt();
         if (check_password_policy() == 1)
         {
-          out_push (&out, plain_ptr, plain_len);
-          out_push_original_word (&out, plain_ptr_save, plain_len_save);
-          out_push_pw_count(&out);
+          //out_push (&out, plain_ptr, plain_len);
+          //out_push_original_word (&out, plain_ptr_save, plain_len_save);
+          //out_push_pw_count(&out);
         }
         
       }
