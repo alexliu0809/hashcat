@@ -485,7 +485,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
       u32 words_extra_total = 0;
 
       printf("words_extra initial: %u\n",words_extra);
-      while (words_extra)
+      while (words_extra) //detect over length
       {
         const u32 work = get_work (hashcat_ctx, device_param, words_extra);
         printf("work: %u\n",work); //work: 4096 for wordlist > 4096
@@ -495,6 +495,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
 
         words_off = device_param->words_off;
         words_fin = words_off + work;
+        printf("words_off: %llu words_fin:%llu\n",words_off,words_fin);
 
         char *line_buf;
         u32   line_len;
@@ -503,6 +504,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
 
         for ( ; words_cur < words_off; words_cur++) get_next_word (hashcat_ctx_tmp, fd, &line_buf, &line_len);
 
+        //each time read 4096
         for ( ; words_cur < words_fin; words_cur++)
         {
           get_next_word (hashcat_ctx_tmp, fd, &line_buf, &line_len);
@@ -532,6 +534,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
           {
             if ((line_len < hashconfig->pw_min) || (line_len > hashconfig->pw_max))
             {
+              //Detect over length words
               printf("hashconfig->pw_min: %d hashconfig->pw_max:%d\n", hashconfig->pw_min,hashconfig->pw_max);
               words_extra++;
 
@@ -551,11 +554,11 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
             }
           }
 
-          pw_add (device_param, (u8 *) line_buf, (int) line_len);
+          pw_add (device_param, (u8 *) line_buf, (int) line_len); //if not over size. Add to device_param
 
           if (status_ctx->run_thread_level1 == false) break;
         }
-
+        printf("words_extra: %u\n",words_extra);
         words_extra_total += words_extra;
 
         if (status_ctx->run_thread_level1 == false) break;
