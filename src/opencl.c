@@ -1875,8 +1875,11 @@ int run_cracker (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, co
     else if (user_options_extra->attack_kern == ATTACK_KERN_BF)        innerloop_cnt  = mask_ctx->bfs_cnt;
 
     // innerloops
-    printf("Innerloops: %d %d %d\n", innerloop_cnt, innerloop_step, hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
+    printf("Innerloops: %d %d %d\n",  innerloop_cnt, innerloop_step, hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
     /*
+    innerloop_cnt = number of rules.
+    innerloop_step = number of rules processed together
+
     device_param->kernel_loops_min = 1;
     device_param->kernel_loops_max = 1024;
 
