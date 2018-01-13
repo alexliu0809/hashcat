@@ -1095,7 +1095,7 @@ int choose_kernel (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, 
   hashes_t       *hashes       = hashcat_ctx->hashes;
   status_ctx_t   *status_ctx   = hashcat_ctx->status_ctx;
   user_options_t *user_options = hashcat_ctx->user_options;
-  printf("choose_kernel: %d %d \n", highest_pw_len, pws_cnt); //Result: 0, 8 -- for total 16 pwds. Not used: highest_pw_len
+  printf("choose_kernel: %d %d \n", highest_pw_len, pws_cnt); //Result: 0, 8 -- for total 9 words in wordlist -- one too long. Not used: highest_pw_len
   if (hashconfig->hash_mode == 2000)
   {
     return process_stdout (hashcat_ctx, device_param, pws_cnt);
@@ -1875,10 +1875,13 @@ int run_cracker (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, co
     else if (user_options_extra->attack_kern == ATTACK_KERN_BF)        innerloop_cnt  = mask_ctx->bfs_cnt;
 
     // innerloops
-    printf("Innerloops: %d %d %d\n",  innerloop_cnt, innerloop_step, hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
+    printf("Innerloops: %d %d %d %d\n",  innerloop_cnt, innerloop_step, hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL, pws_cnt); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
     /*
     innerloop_cnt = number of rules.
     innerloop_step = number of rules processed together
+    pws_cnt = words in wordlist -- remove too long --> at most 4096
+
+    HC is indeed a batched!
 
     device_param->kernel_loops_min = 1;
     device_param->kernel_loops_max = 1024;
