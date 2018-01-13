@@ -101,6 +101,8 @@ static u32 get_work (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param
 
   const u32 kernel_power = get_power (opencl_ctx, device_param);
 
+  printf("kernel_power: %u\n",kernel_power);
+  printf("words_left: %llu\n",words_left);
   u32 work = MIN (words_left, kernel_power);
 
   work = MIN (work, max);
@@ -121,6 +123,7 @@ static int calc_stdin (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_par
   straight_ctx_t       *straight_ctx       = hashcat_ctx->straight_ctx;
   status_ctx_t         *status_ctx         = hashcat_ctx->status_ctx;
 
+  printf("calc_stdin");
   char *buf = (char *) hcmalloc (HCBUFSIZ_LARGE);
 
   bool iconv_enabled = false;
@@ -324,8 +327,11 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
   const u32 attack_mode = user_options->attack_mode;
   const u32 attack_kern = user_options_extra->attack_kern;
 
+  printf("calc\n");
+  printf("Inital device_param->pws_cnt: %d\n",device_param->pws_cnt);
   if (attack_mode == ATTACK_MODE_BF)
   {
+    //not here
     while (status_ctx->run_thread_level1 == true)
     {
       const u32 work = get_work (hashcat_ctx, device_param, -1u);
@@ -336,6 +342,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
       const u64 words_fin = words_off + work;
 
       device_param->pws_cnt = work;
+      printf("device_param->pws_cnt/work: %d\n",work);
 
       int CL_rc;
 
@@ -477,10 +484,11 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
 
       u32 words_extra_total = 0;
 
+      printf("words_extra initial: %u\n",words_extra);
       while (words_extra)
       {
         const u32 work = get_work (hashcat_ctx, device_param, words_extra);
-
+        printf("work: %u\n",work); //work: 4096 for wordlist > 4096
         if (work == 0) break;
 
         words_extra = 0;
@@ -524,6 +532,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
           {
             if ((line_len < hashconfig->pw_min) || (line_len > hashconfig->pw_max))
             {
+              printf("hashconfig->pw_min: %d hashconfig->pw_max:%d\n", hashconfig->pw_min,hashconfig->pw_max);
               words_extra++;
 
               continue;
