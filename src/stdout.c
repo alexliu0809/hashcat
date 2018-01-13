@@ -15,6 +15,41 @@
 
 u32 plain_buf_save[16] = { 0 };
 u32 plain_len_save =  0;
+
+char pw_cnt[32] = {0};
+int pw_cnt_len = 0;
+
+static void increament_pw_cnt()
+{
+  //Assume we know that len(pw) = 32
+  int i = 0;
+  while (1)
+  {
+    if (pw_cnt[32-i-1] == 0) //Not initialized
+    {
+      pw_cnt[32-i-1] = '1';
+      pw_cnt_len += 1; //New digit introduced
+      break; //no carry
+    }
+    else if (pw_cnt[32-i-1] == '9')
+    {
+      pw_cnt[32-i-1] = '0'; //carry
+    }
+    else
+    {
+      pw_cnt[32-i-1] += 1;
+      break; // no carry
+    }
+    i ++; 
+  }
+}
+
+static int check_password_policy()
+{
+  return 1;
+}
+
+
 static void out_flush (out_t *out)
 {
   if (out->len == 0) return;
@@ -31,20 +66,20 @@ static void out_push (out_t *out, const u8 *pw_buf, const int pw_len)
 
   memcpy (ptr, pw_buf, pw_len);
 
-  #if defined (_WIN)
+  //#if defined (_WIN)
 
-  ptr[pw_len + 0] = '\r';
-  ptr[pw_len + 1] = '\n';
+  //ptr[pw_len + 0] = '\r';
+  //ptr[pw_len + 1] = '\n';
 
-  out->len += pw_len + 2;
+  //out->len += pw_len + 2;
 
-  #else
+  //#else
 
-  ptr[pw_len] = '\n';
+  ptr[pw_len] = '\t';
 
   out->len += pw_len + 1;
 
-  #endif
+  //#endif
 
   if (out->len >= BUFSIZ - 100)
   {
@@ -52,7 +87,7 @@ static void out_push (out_t *out, const u8 *pw_buf, const int pw_len)
   }
 }
 
-static void out_push_original (out_t *out, const u8 *pw_buf, const int pw_len)
+static void out_push_original_word (out_t *out, const u8 *pw_buf, const int pw_len)
 {
   char *ptr = out->buf + out->len;
 
@@ -70,8 +105,24 @@ static void out_push_original (out_t *out, const u8 *pw_buf, const int pw_len)
   }
 }
 
+static void out_push_pw_count(out_t *out)
+{
+  char *ptr = out->buf + out->len;
+
+  memcpy (ptr, pw_cnt + 32 - pw_cnt_len, pw_cnt_len);
+
+  ptr[pw_cnt_len] = '\n';
+
+  out->len += pw_cnt_len + 1;
+
+  if (out->len >= BUFSIZ - 100)
+  {
+    out_flush (out);
+  }
+}
 int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, const u32 pws_cnt)
 {
+  //called twice
   combinator_ctx_t *combinator_ctx = hashcat_ctx->combinator_ctx;
   hashconfig_t     *hashconfig     = hashcat_ctx->hashconfig;
   mask_ctx_t       *mask_ctx       = hashcat_ctx->mask_ctx;
@@ -118,12 +169,16 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
 
   u32 plain_len = 0;
 
+
+
   const u32 il_cnt = device_param->kernel_params_buf32[30]; // ugly, i know
 
   if (user_options->attack_mode == ATTACK_MODE_STRAIGHT)
   {
     //printf("ATTACK_MODE_STRAIGHT\n");
     pw_t pw;
+
+    //printf("%d\n", hashconfig->pw_max); -- result:31
 
     for (u32 gidvid = 0; gidvid < pws_cnt; gidvid++)
     {
@@ -137,6 +192,8 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
       }
 
       const u32 pos = device_param->innerloop_pos;
+      
+
 
       for (u32 il_pos = 0; il_pos < il_cnt; il_pos++)
       {
@@ -157,8 +214,14 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
 
         if (plain_len > hashconfig->pw_max) plain_len = hashconfig->pw_max;
 
-        out_push_original (&out, plain_ptr_save, plain_len_save);
-        out_push (&out, plain_ptr, plain_len);
+
+        increament_pw_cnt();
+        if (check_password_policy() == 1)
+        {
+          out_push (&out, plain_ptr, plain_len);
+          out_push_original_word (&out, plain_ptr_save, plain_len_save);
+          out_push_pw_count(&out);
+        }
         
       }
     }

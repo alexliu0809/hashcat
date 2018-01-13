@@ -974,12 +974,12 @@ int main (int argc, char **argv)
   int new_argc = argc;
   for (int i = 0; i < argc; i++)
   {
-    printf("%s\n",argv[i]);
+    //printf("%s\n",argv[i]);
     if (prefix("--length",argv[i]))
     {
       new_argc --;
     }
-    else if (prefix("--digits",argv[i]))
+    else if (prefix("--number",argv[i]))
     {
       new_argc --;
     }
@@ -992,6 +992,10 @@ int main (int argc, char **argv)
       new_argc --;
     }
     else if (prefix("--symbols",argv[i]))
+    {
+      new_argc --;
+    }
+    else if (prefix("--letter",argv[i]))
     {
       new_argc --;
     }
