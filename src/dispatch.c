@@ -488,6 +488,8 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
       while (words_extra) //detect over length
       {
         const u32 work = get_work (hashcat_ctx, device_param, words_extra);
+        //Fill More Words If there's extra.
+        
         printf("work: %u\n",work); //work: 4096 for wordlist > 4096
         if (work == 0) break;
 
@@ -534,7 +536,7 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
           {
             if ((line_len < hashconfig->pw_min) || (line_len > hashconfig->pw_max))
             {
-              //Detect over length words
+              //Detect over length words. hashconfig->pw_min == 0, hashconfig->pw_max == 31
               printf("hashconfig->pw_min: %d hashconfig->pw_max:%d\n", hashconfig->pw_min,hashconfig->pw_max);
               words_extra++;
 
