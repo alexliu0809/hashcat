@@ -3567,6 +3567,7 @@ int opencl_session_begin (hashcat_ctx_t *hashcat_ctx)
     {
       u32 _kernel_accel = tuningdb_entry->kernel_accel;
       u32 _kernel_loops = tuningdb_entry->kernel_loops;
+      printf("tuningdb_entry->kernel_loops: %u\n", _kernel_loops); // 0 for std out
 
       if (_kernel_accel)
       {
