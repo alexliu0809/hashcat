@@ -100,9 +100,10 @@ static u32 get_work (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param
   }
 
   const u32 kernel_power = get_power (opencl_ctx, device_param);
-
-  printf("kernel_power: %u\n",kernel_power);
-  printf("words_left: %llu\n",words_left);
+  #ifdef ALEXDEBUG
+    printf("kernel_power: %u\n",kernel_power);
+    printf("words_left: %llu\n",words_left);
+  #endif
   u32 work = MIN (words_left, kernel_power);
 
   work = MIN (work, max);
@@ -327,8 +328,10 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
   const u32 attack_mode = user_options->attack_mode;
   const u32 attack_kern = user_options_extra->attack_kern;
 
-  printf("calc\n");
-  printf("Inital device_param->pws_cnt: %d\n",device_param->pws_cnt);
+  #ifdef ALEXDEBUG
+    printf("calc\n");
+    printf("Inital device_param->pws_cnt: %d\n",device_param->pws_cnt);
+  #endif
   if (attack_mode == ATTACK_MODE_BF)
   {
     //not here
@@ -484,20 +487,27 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
 
       u32 words_extra_total = 0;
 
-      printf("words_extra initial: %u\n",words_extra);
+      #ifdef ALEXDEBUG
+        printf("words_extra initial: %u\n",words_extra);
+      #endif
+        
       while (words_extra) //detect over length
       {
         const u32 work = get_work (hashcat_ctx, device_param, words_extra);
         //Fill More Words If there's extra.
-        
-        printf("work: %u\n",work); //work: 4096 for wordlist > 4096
+        #ifdef ALEXDEBUG
+          printf("work: %u\n",work); //work: 4096 for wordlist > 4096
+        #endif
         if (work == 0) break;
 
         words_extra = 0;
 
         words_off = device_param->words_off;
         words_fin = words_off + work;
-        printf("words_off: %llu words_fin:%llu\n",words_off,words_fin);
+        
+        #ifdef ALEXDEBUG
+          printf("words_off: %llu words_fin:%llu\n",words_off,words_fin);
+        #endif
 
         char *line_buf;
         u32   line_len;
@@ -537,7 +547,9 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
             if ((line_len < hashconfig->pw_min) || (line_len > hashconfig->pw_max))
             {
               //Detect over length words. hashconfig->pw_min == 0, hashconfig->pw_max == 31
-              printf("hashconfig->pw_min: %d hashconfig->pw_max:%d\n", hashconfig->pw_min,hashconfig->pw_max);
+              #ifdef ALEXDEBUG
+                printf("hashconfig->pw_min: %d hashconfig->pw_max:%d\n", hashconfig->pw_min,hashconfig->pw_max);
+              #endif
               words_extra++;
 
               continue;
@@ -560,7 +572,9 @@ static int calc (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param)
 
           if (status_ctx->run_thread_level1 == false) break;
         }
-        printf("words_extra: %u\n",words_extra);
+        #ifdef ALEXDEBUG
+          printf("words_extra: %u\n",words_extra);
+        #endif
         words_extra_total += words_extra;
 
         if (status_ctx->run_thread_level1 == false) break;
