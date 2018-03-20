@@ -44,8 +44,88 @@ static void increament_pw_cnt()
   }
 }
 
-static int check_password_policy()
+static int check_password_policy(const u8 *pw_buf, const int pw_len)
 {
+  /*
+  printf("%d\n", check_length);
+  printf("%d\n", check_digit);
+  printf("%d\n", check_lower);
+  printf("%d\n", check_letter);
+  printf("%d\n", check_upper);
+  printf("%d\n", check_symbol);
+  printf("The End\n");
+  */
+  if (check_length != -1 && check_length >= 0)
+  {
+    //if pw_len < check_length, reject
+    if (pw_len < check_length)
+    {
+      return 0;
+    }
+  }
+
+
+
+  int digit_flag = check_digit != 0? 1:0;
+  int lower_flag = check_lower != 0? 1:0;
+  int letter_flag = check_letter != 0? 1:0;
+  int upper_flag = check_upper != 0? 1:0;
+  //symbol_flag = check_symbol != 0? 1:0;
+
+  for (int i = 0; i < pw_len; i ++)
+  {
+    /* PRINTABLE ASCII CHECK */
+    if ((pw_buf[i]) < 32 || (pw_buf[i]) > 126)
+    {
+      return 0;
+    }
+
+
+    /* Rejection Policy Check */
+    // If contains digit, 
+    if ((pw_buf[i]) >= '0' && (pw_buf[i]) <= '9')
+    {
+      if (digit_flag == 1)
+      {
+        digit_flag = 0; // satisfy digit flag
+      }
+    }
+    if ( (pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z')
+    {
+      if (lower_flag == 1)
+      {
+        lower_flag = 0; // satisfy lower_flag
+      }
+    }
+    if ( (pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')
+    {
+      if (upper_flag == 1)
+      {
+        upper_flag = 0; // satisfy upper_flag
+      }
+    }
+    if ( ((pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z') || ((pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z') )
+    {
+      if (letter_flag == 1)
+      {
+        letter_flag = 0; // satisfy letter_flag
+      }
+    }
+    /*
+    if ( *(pw_buf[i] >= 'A' && *(pw_buf[i]) <= 'Z')
+    {
+      if (symbol_flag == 1)
+      {
+        printf("symbol_flag Not Implemented");
+      }
+    }
+    */
+  }
+  if (digit_flag == 1 || lower_flag == 1 || upper_flag == 1 || letter_flag == 1)
+  {
+    return 0;
+  }
+
   return 1;
 }
 
@@ -87,6 +167,7 @@ static void out_push (out_t *out, const u8 *pw_buf, const int pw_len)
   }
 }
 
+// If output number, add \t otherwise \n
 static void out_push_original_word (out_t *out, const u8 *pw_buf, const int pw_len)
 {
   char *ptr = out->buf + out->len;
@@ -94,7 +175,7 @@ static void out_push_original_word (out_t *out, const u8 *pw_buf, const int pw_l
   memcpy (ptr, pw_buf, pw_len);
 
 
-  ptr[pw_len] = '\t';
+  ptr[pw_len] = '\n';
 
   out->len += pw_len + 1;
 
@@ -216,11 +297,11 @@ int process_stdout (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param,
 
 
         //increament_pw_cnt();
-        if (check_password_policy() == 1)
+        if (check_password_policy(plain_ptr, plain_len) == 1)
         {
           out_push (&out, plain_ptr, plain_len);
           out_push_original_word (&out, plain_ptr_save, plain_len_save);
-          out_push_pw_count(&out);
+          //out_push_pw_count(&out);
         }
         
       }

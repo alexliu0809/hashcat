@@ -962,8 +962,13 @@ static void event (const u32 id, hashcat_ctx_t *hashcat_ctx, const void *buf, co
     case EVENT_WORDLIST_CACHE_HIT:        main_wordlist_cache_hit        (hashcat_ctx, buf, len); break;
   }
 }
-int check_length;
-int check_number;
+int check_length = -1;
+int check_digit = 0;
+int check_letter = 0;
+int check_lower = 0;
+int check_upper = 0;
+int check_symbol = 0;
+
 bool prefix(const char *pre, const char *str)
 {
     return strncmp(pre, str, strlen(pre)) == 0;
@@ -975,36 +980,42 @@ int main (int argc, char **argv)
   for (int i = 0; i < argc; i++)
   {
     //printf("%s\n",argv[i]);
-    if (prefix("--length",argv[i]))
+    if (prefix("--length=",argv[i]))
     {
       new_argc --;
+      check_length = atoi(argv[i]+9);
     }
-    else if (prefix("--number",argv[i]))
+    else if (prefix("--digit",argv[i]))
     {
       new_argc --;
+      check_digit = 1;
     }
-    else if (prefix("--uppers",argv[i]))
+    else if (prefix("--upper",argv[i]))
     {
       new_argc --;
+      check_upper = 1;
     }
-    else if (prefix("--lowers",argv[i]))
+    else if (prefix("--lower",argv[i]))
     {
       new_argc --;
+      check_lower = 1;
     }
-    else if (prefix("--symbols",argv[i]))
+    else if (prefix("--symbol",argv[i]))
     {
       new_argc --;
+      check_symbol = 1;
     }
     else if (prefix("--letter",argv[i]))
     {
       new_argc --;
+      check_letter = 1;
     }
 
   }
   argc = new_argc;
 
-  check_length = 2;
-  check_number = 1;
+  //check_length = 2;
+  //check_number = 1;
   // this increases the size on windows dox boxes
 
   setup_console ();
