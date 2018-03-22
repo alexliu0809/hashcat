@@ -70,35 +70,44 @@ static int check_password_policy(const u8 *pw_buf, const int pw_len)
   int lower_flag = check_lower != 0? 1:0;
   int letter_flag = check_letter != 0? 1:0;
   int upper_flag = check_upper != 0? 1:0;
-
+  int flag_count = digit_flag + lower_flag + letter_flag + upper_flag;
   //symbol_flag = check_symbol != 0? 1:0;
 
   for (int i = 0; i < pw_len; i ++)
   {
-    /* PRINTABLE ASCII CHECK */
+    /* PRINTABLE ASCII CHECK 
     if ((pw_buf[i]) < 32 || (pw_buf[i]) > 126)
     {
       return 0;
     }
+    */
 
+    if (flag_count == 0)
+    {
+      return 1
+    }
 
     /* Rejection Policy Check */
     // If contains digit, 
     if ( ( digit_flag == 1 ) && (pw_buf[i]) >= '0' && (pw_buf[i]) <= '9')
     {
         digit_flag = 0; // satisfy digit flag
+        flag_count -= 1;
     }
     if ( (lower_flag == 1) && (pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z')
     {
         lower_flag = 0; // satisfy lower_flag
+        flag_count -= 1;
     }
     if ( (upper_flag == 1) && (pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')
     {
         upper_flag = 0; // satisfy upper_flag
+        flag_count -=1;
     }
     if ( (letter_flag == 1) && (((pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z') || ((pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')) )
     {
         letter_flag = 0; // satisfy letter_flag
+        flag_count -= 1;
     }
     /*
     if ( *(pw_buf[i] >= 'A' && *(pw_buf[i]) <= 'Z')
@@ -110,7 +119,7 @@ static int check_password_policy(const u8 *pw_buf, const int pw_len)
     }
     */
   }
-  if (digit_flag == 1 || lower_flag == 1 || upper_flag == 1 || letter_flag == 1)
+  if (flag_count > 0)
   {
     return 0;
   }
