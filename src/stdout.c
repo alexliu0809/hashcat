@@ -84,7 +84,7 @@ static int check_password_policy(const u8 *pw_buf, const int pw_len)
 
     if (flag_count == 0)
     {
-      return 1
+      return 1;
     }
 
     /* Rejection Policy Check */
