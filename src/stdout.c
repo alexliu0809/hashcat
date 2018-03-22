@@ -70,6 +70,7 @@ static int check_password_policy(const u8 *pw_buf, const int pw_len)
   int lower_flag = check_lower != 0? 1:0;
   int letter_flag = check_letter != 0? 1:0;
   int upper_flag = check_upper != 0? 1:0;
+
   //symbol_flag = check_symbol != 0? 1:0;
 
   for (int i = 0; i < pw_len; i ++)
@@ -83,33 +84,21 @@ static int check_password_policy(const u8 *pw_buf, const int pw_len)
 
     /* Rejection Policy Check */
     // If contains digit, 
-    if ((pw_buf[i]) >= '0' && (pw_buf[i]) <= '9')
+    if ( ( digit_flag == 1 ) && (pw_buf[i]) >= '0' && (pw_buf[i]) <= '9')
     {
-      if (digit_flag == 1)
-      {
         digit_flag = 0; // satisfy digit flag
-      }
     }
-    if ( (pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z')
+    if ( (lower_flag == 1) && (pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z')
     {
-      if (lower_flag == 1)
-      {
         lower_flag = 0; // satisfy lower_flag
-      }
     }
-    if ( (pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')
+    if ( (upper_flag == 1) && (pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')
     {
-      if (upper_flag == 1)
-      {
         upper_flag = 0; // satisfy upper_flag
-      }
     }
-    if ( ((pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z') || ((pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z') )
+    if ( (letter_flag == 1) && (((pw_buf[i]) >= 'a' && (pw_buf[i]) <= 'z') || ((pw_buf[i]) >= 'A' && (pw_buf[i]) <= 'Z')) )
     {
-      if (letter_flag == 1)
-      {
         letter_flag = 0; // satisfy letter_flag
-      }
     }
     /*
     if ( *(pw_buf[i] >= 'A' && *(pw_buf[i]) <= 'Z')
