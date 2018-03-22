@@ -1358,7 +1358,7 @@ typedef struct out
 {
   FILE *fp;
 
-  char  buf[HCBUFSIZ_LARGE];
+  char  buf[HCBUFSIZ_LARGE * 16];
   int   len;
 
 } out_t;
