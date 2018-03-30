@@ -1294,6 +1294,9 @@ void user_options_preprocess (hashcat_ctx_t *hashcat_ctx)
     user_options->kernel_accel        = 1024;
     user_options->kernel_loops        = 1024;
     user_options->opencl_vector_width = 1;
+    #ifdef ALEXDEBUG
+      printf("Default Kernel Loop In STDOUT:%d\n", user_options->kernel_loops);
+    #endif
   }
 
   if (user_options->opencl_info == true)

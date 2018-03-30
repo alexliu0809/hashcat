@@ -3381,7 +3381,13 @@ void opencl_ctx_devices_kernel_loops (hashcat_ctx_t *hashcat_ctx)
       if ((innerloop_cnt >= device_param->kernel_loops_min) &&
           (innerloop_cnt <= device_param->kernel_loops_max))
       {
-        device_param->kernel_loops_max = innerloop_cnt;
+        
+
+          device_param->kernel_loops_max = innerloop_cnt;
+        #ifdef ALEXDEBUG
+          printf("limit kernel loops\n");
+          printf("kernel_rules_cnt, kernel_loops_max: %d %d\n", straight_ctx->kernel_rules_cnt, device_param->kernel_loops_max);
+        #endif
       }
     }
   }
