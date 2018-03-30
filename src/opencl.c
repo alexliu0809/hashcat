@@ -1871,7 +1871,11 @@ int run_cracker (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, co
 
     if   (hashconfig->attack_exec == ATTACK_EXEC_INSIDE_KERNEL) innerloop_step = device_param->kernel_loops;
     else                                                        innerloop_step = 1;
-
+    #ifdef ALEXDEBUG
+      //kernel loops decides how many rules each time
+      printf("Kernel_loops: %d\n", device_param->kernel_loops); //5,2,1 for 5 rules. 21, 10, 1 for 21 rules. Called once
+    #endif
+      
     if      (user_options_extra->attack_kern == ATTACK_KERN_STRAIGHT)  innerloop_cnt  = straight_ctx->kernel_rules_cnt;
     else if (user_options_extra->attack_kern == ATTACK_KERN_COMBI)     innerloop_cnt  = combinator_ctx->combs_cnt;
     else if (user_options_extra->attack_kern == ATTACK_KERN_BF)        innerloop_cnt  = mask_ctx->bfs_cnt;
