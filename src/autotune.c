@@ -13,6 +13,10 @@
 
 static double try_run (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param, const u32 kernel_accel, const u32 kernel_loops)
 {
+  #ifdef ALEXDEBUG
+  printf("Run Try_Run \n");
+  printf("kernel_loops para in try_run: %d\n", kernel_loops);
+  #endif
   hashconfig_t *hashconfig = hashcat_ctx->hashconfig;
 
   device_param->kernel_params_buf32[28] = 0;
@@ -139,6 +143,9 @@ static int autotune (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param
   {
     for (kernel_loops = kernel_loops_max; kernel_loops > kernel_loops_min; kernel_loops >>= 1)
     {
+      #ifdef ALEXDEBUG
+      printf("Current kernel_loops in finding best kernel loops: %d\n",kernel_loops);
+      #endif
       double exec_msec = try_run (hashcat_ctx, device_param, kernel_accel_min, kernel_loops);
 
       for (int i = 0; i < VERIFIER_CNT; i++)
@@ -202,20 +209,52 @@ static int autotune (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param
   if ((kernel_loops_min < kernel_loops_max) && (kernel_accel_min < kernel_accel_max))
   {
     u32 kernel_accel_orig = kernel_accel;
-    u32 kernel_loops_orig = kernel_loops;
+    u32 kernel_loops_orig = kernel_loops;  //Origin = number of input rules.
+    #ifdef ALEXDEBUG
+      printf("Before try run1\n");
+      printf("diff %d\n",diff);
+      printf("Inital kernel_accel_orig %d, kernel_loops_orig %d\n",kernel_accel,kernel_loops); //kernel_accel_orig = 512
+      printf("Inital kernel_loops_min %d, kernel_accel_min %d\n",kernel_loops_min,kernel_accel_min);
+      printf("Inital kernel_loops_max %d, kernel_accel_max %d\n",kernel_loops_max,kernel_accel_max);//kernel_accel_max = 1024
+    #endif
+
 
     for (u32 f = 1; f < 1024; f++)
     {
+      #ifdef ALEXDEBUG
+        printf("One Iteration of f, f: %d\n", f);
+        /*
+        Number of iterations is bounded by kernel_accel_orig.
+        At most divided by 2.
+        If 
+
+        */
+      #endif
+
       const u32 kernel_accel_try = kernel_accel_orig * f;
       const u32 kernel_loops_try = kernel_loops_orig / f;
-
+      #ifdef ALEXDEBUG
+        printf("kernel_accel_try %d kernel_loops_try %d\n", kernel_accel_try, kernel_loops_try);
+        printf("Returned!\n");
+      #endif
       if (kernel_accel_try > kernel_accel_max) break;
+      #ifdef ALEXDEBUG
+        printf("Returned!0\n");
+      #endif
       if (kernel_loops_try < kernel_loops_min) break;
-
+      #ifdef ALEXDEBUG
+        printf("Returned!1\n");
+      #endif
       u32 diff_new = kernel_loops_try - kernel_accel_try;
-
+      #ifdef ALEXDEBUG
+        //Notice that here diff_new is u32. so if diff_new is neg, it is positive instead because of u32
+        printf("diff_new %d\n", diff_new);
+        printf("Returned!2\n");
+      #endif
       if (diff_new > diff) break;
-
+      #ifdef ALEXDEBUG
+        printf("Returned!3\n");
+      #endif
       double exec_msec = try_run (hashcat_ctx, device_param, kernel_accel_try, kernel_loops_try);
 
       for (int verifier_idx = 0; verifier_idx < VERIFIER_CNT; verifier_idx++)
@@ -230,8 +269,11 @@ static int autotune (hashcat_ctx_t *hashcat_ctx, hc_device_param_t *device_param
         exec_msec_pre_final = exec_msec;
 
         kernel_accel = kernel_accel_try;
-        kernel_loops = kernel_loops_try;
+        kernel_loops = kernel_loops_try; 
       }
+      #ifdef ALEXDEBUG
+        printf("After one 1 Iteration, kernel_loops: %d\n", kernel_loops);
+      #endif
     }
   }
 
